@@ -226,6 +226,7 @@ local mixins = {
 		self:CheckProfiles()
 	end,
 	OnProfileDeleted = function(self, event, db, profile)
+		UIDropDownMenu_SetText(self.delete, nil)
 		self:CheckProfiles()
 	end,
 	CheckProfiles = function(self)
@@ -276,6 +277,7 @@ end
 
 local function deleteProfileOnClick(self, profile)
 	StaticPopup_Show("DELETE_PROFILE", nil, nil, {db = self.owner.db, profile = profile})
+	UIDropDownMenu_SetSelectedValue(self.owner, profile)
 end
 
 function AceDBUI:CreateUI(name, db, frame)
@@ -329,7 +331,7 @@ function AceDBUI:CreateUI(name, db, frame)
 	copy.nocurrent = true
 	objects.copy = copy
 
-	local delete = createDropdown(frame)
+	delete = createDropdown(frame)
 	delete:SetPoint("TOP", copy, "BOTTOM", 0, -16)
 	delete.label:SetText(L.delete)
 	delete.func = deleteProfileOnClick
@@ -367,8 +369,11 @@ StaticPopupDialogs["DELETE_PROFILE"] = {
 	text = L.delete_confirm,
 	button1 = YES,
 	button2 = NO,
-	OnAccept = function(self, data)
+	OnAccept = function(_, data)
 		data.db:DeleteProfile(data.profile)
+	end,
+	OnCancel = function()
+		UIDropDownMenu_SetText(delete, nil)
 	end,
 	timeout = 0,
 }
