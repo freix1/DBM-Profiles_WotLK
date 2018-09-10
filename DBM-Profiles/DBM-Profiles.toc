@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: Deadly Boss Mods Profiles
 ## Notes: AceDB profiles for Deadly Boss Mods.
-## Version: 1.0.0
+## Version: 1.0.1
 ## Author: Lombra
 ## RequiredDeps: DBM-Core
 ## DefaultState: enabled

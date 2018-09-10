@@ -1,6 +1,6 @@
 # DBM-Profiles WotLK
 
-This is a Wrath of the Lich King backport of [DBM-Profiles](https://wow.curseforge.com/projects/dbm-profiles) made by [Lombra](https://wow.curseforge.com/members/Lombra).
+This is a Wrath of the Lich King backport of [DBM-Profiles](https://wow.curseforge.com/projects/dbm-profiles) by [Lombra](https://wow.curseforge.com/members/Lombra).
 
 AddOn description by Lombra:
 > This addon implements AceDB profiles for Deadly Boss Mods, allowing you to share settings among characters. Dual spec profiling is supported.<br><br>
