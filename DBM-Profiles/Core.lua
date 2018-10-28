@@ -3,7 +3,7 @@ local addonName = ...
 local DBM = DBM
 
 local function copyTable(source, dest)
-	for k, v in pairs(source) do
+	for k,v in pairs(source) do
 		dest[k] = v
 	end
 end
@@ -74,7 +74,7 @@ local optionHooks = {
 	NewPhaseAnnounce = setWarningType1
 }
 
-for k, v in pairs(optionHooks) do
+for k,v in pairs(optionHooks) do
 	hooksecurefunc(bossModPrototype, k, v)
 end
 
@@ -107,15 +107,15 @@ function addon:ADDON_LOADED(addon)
 			local area = panel:CreateArea(nil, nil, nil, true)
 			AceDBUI:CreateUI("DBM-Profiles-UI", self.db, area.frame)
 		end)
-		
+
 		local function setOnShow(addon, panel, subtab)
 			if addon.modId == "DBM-PvP" then return	end
 			local area = panel.areas[1]
 			local frame = area.frame
 			wipe(area.onshowcall)
 			local n = 0
-			
-			for _, mod in ipairs(DBM.Mods) do
+
+			for _,mod in ipairs(DBM.Mods) do
 				if mod.modId == addon.modId and (not subtab or subtab == mod.subTab) then
 					local p = {mod = mod}
 					p.nKills, p.nWipes, p.nTime, p.hKills, p.hWipes, p.hTime = select(9 + 9 + (14 * n), frame:GetRegions())
@@ -129,13 +129,13 @@ function addon:ADDON_LOADED(addon)
 				end
 			end)
 		end
-		
+
 		local loadedSubTabs = {}
-		
+
 		local orig_UpdateModList = DBM_GUI.UpdateModList
 		function DBM_GUI:UpdateModList()
 			orig_UpdateModList(self)
-			for k, addon in ipairs(DBM.AddOns) do
+			for _,addon in ipairs(DBM.AddOns) do
 				if not IsAddOnLoaded(addon.modId) then
 					-- this relies on the Load button being the only child of this frame
 					local button = addon.panel.frame:GetChildren()
@@ -148,7 +148,7 @@ function addon:ADDON_LOADED(addon)
 				else
 					setOnShow(addon, addon.panel)
 					if addon.subTabs then
-						for k, v in pairs(addon.subTabs) do
+						for k,_ in pairs(addon.subTabs) do
 							if addon.subPanels[k] then
 								setOnShow(addon, addon.subPanels[k], k)
 							end
@@ -160,9 +160,9 @@ function addon:ADDON_LOADED(addon)
 			-- restore original function and hook it to hook not yet loaded panels
 			self.UpdateModList = orig_UpdateModList
 			hooksecurefunc(DBM_GUI, "UpdateModList", function(self)
-				for k, addon in ipairs(DBM.AddOns) do
+				for _,addon in ipairs(DBM.AddOns) do
 					if not loadedSubTabs[addon.modId] and addon.subTabs and IsAddOnLoaded(addon.modId) then
-						for k, v in pairs(addon.subTabs) do
+						for k,_ in pairs(addon.subTabs) do
 							if addon.subPanels[k] then
 								setOnShow(addon, addon.subPanels[k], k)
 							end
@@ -178,30 +178,30 @@ function addon:ADDON_LOADED(addon)
 		self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
 		self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
 		LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "DeadlyBossMods")
-  
+
 		local barDB = self.db:RegisterNamespace("DeadlyBarTimers", barDefaults)
 		self.bars = barDB
-		
+
 		-- copy old settings into profile
 		if DBM_SavedOptions and not DBM_SavedOptions["DBM-Profiles"] then
 			copyTable(DBM_SavedOptions, self.db.profile)
 			copyTable(DBT_SavedOptions, barDB.profile)
 			DBM_SavedOptions["DBM-Profiles"] = true
 		end
-		
+
 		self:RefreshConfig()
-		
+
 		local defaultStats = {}
-		
+
 		-- precreate all addon namespaces so profiles can be copied without the addons being loaded
-		for i, v in ipairs(DBM.AddOns) do
+		for _,v in ipairs(DBM.AddOns) do
 			local modDefaults = {
 				profile = {
 					options = {},
 					stats = defaultStats,
 				}
 			}
-			
+
 			local db = self.db:RegisterNamespace(v.modId, modDefaults)
 			db.RegisterCallback(self, "OnProfileChanged", "RefreshModConfig")
 			db.RegisterCallback(self, "OnProfileCopied", "RefreshModConfig")
@@ -210,17 +210,17 @@ function addon:ADDON_LOADED(addon)
 	elseif GetAddOnMetadata(addon, "X-DBM-Mod") then
 		local modId = addon
 		local db = self.db:GetNamespace(modId)
-		
+
 		namespaces[db] = modId
-		
+
 		local statsName = modId:gsub("-", "").."_SavedStats"
 		local oldStats = _G[statsName]
 		if oldStats and not oldStats["DBM-Profiles"] then
 			-- merge the old stats into the current profile
 			local current = db.profile.stats
-			for boss, stats in pairs(oldStats) do
+			for boss,stats in pairs(oldStats) do
 				if current[boss] then
-					for stat, value in pairs(stats) do
+					for stat,value in pairs(stats) do
 						if stat:find("Pulls$") or stat:find("Kills$") then
 							current[boss][stat] = (current[boss][stat] or 0) + value
 						elseif stat:find("BestTime$") then
@@ -234,14 +234,14 @@ function addon:ADDON_LOADED(addon)
 			-- flag the table so it won't get loaded again
 			oldStats["DBM-Profiles"] = true
 		end
-		
+
 		oldOptions[statsName] = _G[statsName]
-		
+
 		-- redefine the old saved variables to "trick" the modules into referring to our profiles instead
 		_G[modId:gsub("-", "").."_SavedVars"] = db.profile.options
 		_G[statsName] = db.profile.stats
-		
-		for i, v in ipairs(DBM.Mods) do
+
+		for _,v in ipairs(DBM.Mods) do
 			if v.modId == modId then
 				db.defaults.profile.options[v.id] = v.defaults
 				v.defaults.Enabled = true
@@ -258,14 +258,16 @@ function addon:ADDON_LOADED(addon)
 end
 
 function addon:PLAYER_LOGOUT()
-	for k, v in pairs(oldOptions) do
+	for k,v in pairs(oldOptions) do
 		_G[k] = v
 	end
 end
 
 function addon:RefreshConfig(event, db, profile)
 	DBM.Options = self.db.profile
-	DBM.Bars.options = setmetatable(self.bars.profile.DBM, barMT)
+	if self.bars then
+		DBM.Bars.options = setmetatable(self.bars.profile.DBM, barMT)
+	end
 	if self.db.profile.ShowMinimapButton then
 		DBMMinimapButton:Show()
 	else
@@ -278,12 +280,12 @@ function addon:RefreshConfig(event, db, profile)
 	end
 	DBM.BossHealth:UpdateSettings()
 	-- announces uses color tables directly for their options, need to remap these upon changing profile
-	for i, v in ipairs(DBM.Mods) do
-		for i, v in ipairs(v.announces) do
+	for _,v in ipairs(DBM.Mods) do
+		for _,v in ipairs(v.announces) do
 			v.color = self.db.profile.WarningColors[v.warningType] or self.db.profile.WarningColors[1]
 		end
 	end
-	
+
 	local self = DBM.Bars
 	self.mainAnchor:ClearAllPoints()
 	self.mainAnchor:SetPoint(self.options.TimerPoint, UIParent, self.options.TimerPoint, self.options.TimerX, self.options.TimerY)
